@@ -1,0 +1,8 @@
+[
+  "tests/test_simple_ml.py::test_add",
+  "tests/test_simple_ml.py::test_parse_mnist",
+  "tests/test_simple_ml.py::test_softmax_loss",
+  "tests/test_simple_ml.py::test_softmax_regression_epoch",
+  "tests/test_simple_ml.py::test_nn_epoch",
+  "tests/test_simple_ml.py::test_softmax_regression_epoch_cpp"
+]

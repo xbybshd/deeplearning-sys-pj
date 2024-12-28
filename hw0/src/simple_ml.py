@@ -102,7 +102,8 @@ def softmax_loss(Z, y):
     np.mean(-np.log(softmax(Z)[np.indices(y.shape)[0], y]))
     pass
     ### END YOUR CODE
-
+def softmax(x):
+    return np.exp(x)/np.sum(np.exp(x),axis=1,keepdims=True)
 
 def softmax_regression_epoch(X, y, theta, lr = 0.1, batch=100):
     """ Run a single epoch of SGD for softmax regression on the data, using
@@ -123,6 +124,14 @@ def softmax_regression_epoch(X, y, theta, lr = 0.1, batch=100):
         None
     """
     ### BEGIN YOUR CODE
+    for i in range(X.shape[0]//batch):
+        x = X[0 + i * batch: (i + 1) * batch]
+        y_b = y[0 + i * batch: (i + 1) * batch]
+        z = softmax(np.matmul(x, theta))
+        z[np.arange(batch),y_b] -= 1
+        grad = np.matmul(x.transpose(),z)/batch
+        theta -= lr * grad
+
     pass
     ### END YOUR CODE
 

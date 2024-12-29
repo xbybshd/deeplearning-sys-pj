@@ -159,6 +159,22 @@ def nn_epoch(X, y, W1, W2, lr = 0.1, batch=100):
         None
     """
     ### BEGIN YOUR CODE
+    # 梯度 W_i = Z_i(G_i+1 esm delta_i+1) 
+    # G_i = G_i+1 delta_i+1 Wi
+    for i in range(X.shape[0] // batch):
+        x = X[0 + i * batch : (i+1) * batch]
+        y_hat = y[0 + i * batch : (i+1) * batch]
+        # forward
+        Z2 = np.matmul(x,W1)
+        np.maximum(0, Z2, Z2)
+        delta_3 = softmax(np.matmul(Z2,W2))
+        # backward
+        delta_3[np.arange(batch), y_hat] -=1
+        G2 = np.matmul(delta_3, W2.transpose())  # G2要带上W2，Gx都要带Wx
+        G1 = np.multiply(np.where(Z2 >0, 1, Z2), G2)  #理论上来说G1应该带上W1，这里为了与讲义一致就不带
+        
+        W1 -= lr/batch * np.matmul(x.transpose(), np.multiply(np.where(Z2 >0, 1, Z2), G2))
+        W2 -= lr/batch * np.matmul(Z2.transpose(), delta_3)
     pass
     ### END YOUR CODE
 
@@ -214,5 +230,5 @@ if __name__ == "__main__":
     print("Training softmax regression")
     train_softmax(X_tr, y_tr, X_te, y_te, epochs=10, lr = 0.1)
 
-    print("\nTraining two layer neural network w/ 100 hidden units")
-    train_nn(X_tr, y_tr, X_te, y_te, hidden_dim=100, epochs=20, lr = 0.2)
+    # print("\nTraining two layer neural network w/ 100 hidden units")
+    # train_nn(X_tr, y_tr, X_te, y_te, hidden_dim=100, epochs=20, lr = 0.2)

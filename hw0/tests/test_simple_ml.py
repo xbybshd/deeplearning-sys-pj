@@ -6,7 +6,9 @@ import mugrade
 from simple_ml import *
 try:
     from simple_ml_ext import *
+    print("AAAA")
 except:
+    print("BBBB")
     pass
 
 

@@ -99,6 +99,8 @@ class Value:
     requires_grad: bool
 
     def realize_cached_data(self):
+        # 这个函数的意思是 op计算出来的结果，暂时保存起来，正常情况下，计算的时候，只需要input和反向梯度，不需要当前op前向结果
+        # 但是有些时候需要，而且需要拷贝
         """Run compute to realize the cached data"""
         # avoid recomputation
         if self.cached_data is not None:

@@ -365,6 +365,7 @@ class ReLU(TensorOp):
 
     def gradient(self, out_grad, node):
         ### BEGIN YOUR SOLUTION
+        # realize_cached_data 是因为我要numpy,copy是因为需要直接在数据上修改，用out是因为如果用input，要再处理一遍小于0
         out = node.realize_cached_data().copy()
         # out 所有大于0的元素，为ture，也构成了索引，然后索引里面为1的都是1
         out[out > 0] = 1

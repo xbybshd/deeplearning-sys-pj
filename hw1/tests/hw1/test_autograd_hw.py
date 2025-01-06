@@ -1037,6 +1037,8 @@ def test_nn_epoch_ndl():
     np.testing.assert_allclose(
         dW2.reshape(10, 3), W2_0 - W2.numpy(), rtol=1e-4, atol=1e-4
     )
+    print("W1_0:",W1_0)
+    print("W1:",W1)
 
     # test full epoch
     X, y = parse_mnist(

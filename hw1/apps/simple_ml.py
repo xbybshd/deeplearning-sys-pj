@@ -33,7 +33,25 @@ def parse_mnist(image_filesname, label_filename):
                 for MNIST will contain the values 0-9.
     """
     ### BEGIN YOUR SOLUTION
-    raise NotImplementedError()
+    with gzip.open(image_filesname, 'rb') as img_f:
+        img_f.read(4) #skip magic number
+        num_images = int.from_bytes(img_f.read(4), 'big') # stored by high(big) endian
+        rows = int.from_bytes(img_f.read(4), 'big')
+        cols = int.from_bytes(img_f.read(4), 'big')
+        
+        image_data = img_f.read(num_images * rows * cols)
+        X = np.frombuffer(image_data, dtype=np.uint8).astype(np.float32)
+        X = X.reshape(num_images, rows * cols)
+        X /= 255.0 # normalize to [0,1]
+        
+    with gzip.open(label_filename, 'rb') as lb_f:
+        lb_f.read(4)
+        num_labels = int.from_bytes(lb_f.read(4), 'big')
+        
+        lable_data = lb_f.read(num_labels)
+        y = np.frombuffer(lable_data, dtype=np.uint8)
+        
+    return X, y
     ### END YOUR SOLUTION
 
 
@@ -54,7 +72,11 @@ def softmax_loss(Z, y_one_hot):
         Average softmax loss over the sample. (ndl.Tensor[np.float32])
     """
     ### BEGIN YOUR SOLUTION
-    raise NotImplementedError()
+    batch_size = Z.shape[0]
+    S = ndl.log(ndl.exp(Z).sum(axes=(1,)))
+    I = (Z * y_one_hot).sum(axes=(1,))
+    loss = (S-I).sum()
+    return loss/batch_size
     ### END YOUR SOLUTION
 
 
@@ -83,7 +105,23 @@ def nn_epoch(X, y, W1, W2, lr=0.1, batch=100):
     """
 
     ### BEGIN YOUR SOLUTION
-    raise NotImplementedError()
+    num_class = W2.shape[1]
+    y_one_hot = np.eye(num_class)[y]
+    for i in range(X.shape[0] // batch):
+        x_tensor = ndl.Tensor(X[0 + i * batch : (i+1) * batch])
+        y_tensor = ndl.Tensor(y_one_hot[0 + i * batch : (i+1) * batch])
+        # forward
+        Z = ndl.relu(x_tensor@W1)@W2
+        loss_err = softmax_loss(Z, y_tensor)
+        # backward
+        loss_err.backward()
+
+        new_w1 = W1.numpy() - lr*W1.grad.numpy()
+        new_w2 = W2.numpy() - lr*W2.grad.numpy()
+        
+        W1 = ndl.Tensor(new_w1)
+        W2 = ndl.Tensor(new_w2)
+    return W1, W2
     ### END YOUR SOLUTION
 
 

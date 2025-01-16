@@ -1,6 +1,7 @@
 """Optimization module"""
 import needle as ndl
 import numpy as np
+from collections import defaultdict
 
 
 class Optimizer:
@@ -24,9 +25,16 @@ class SGD(Optimizer):
         self.weight_decay = weight_decay
 
     def step(self):
-        ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
-        ### END YOUR SOLUTION
+        # grad 是一个中转临时变量，并且构造的时候不加梯度，结束就销毁，即使创建计算图，也是在内部。而外部param全部是用 .data，所以就避免了扩增
+        for param in self.params:
+            if param not in self.u.keys():
+                self.u[param] = ndl.zeros_like(param.grad, requires_grad = False)
+            grad = self.u[param].data * self.momentum + (1 - self.momentum) * (param.grad.data + self.weight_decay * param.data)
+            grad = ndl.Tensor(grad, dtype = param.dtype, requires_grad=False)
+            self.u[param] = grad
+            param.data = param.data - self.lr * grad.data
+
+
 
     def clip_grad_norm(self, max_norm=0.25):
         """
@@ -59,6 +67,15 @@ class Adam(Optimizer):
         self.v = {}
 
     def step(self):
-        ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
-        ### END YOUR SOLUTION
+        self.t += 1
+        for param in self.params:
+            if param.grad is not None:
+                grad = param.grad.data + self.weight_decay * param.data
+                self.m[param] = self.beta1 * self.m.get(param, 0) + (1 - self.beta1) * grad.data
+                self.v[param] = self.beta2 * self.v.get(param, 0) + (1 - self.beta2) * grad.data * grad.data
+                u_hat = self.m[param] / (1 - self.beta1 ** self.t)
+                v_hat = self.v[param] / (1 - self.beta2 ** self.t)
+                out = param.data - self.lr * u_hat / (ndl.ops.power_scalar(v_hat, 0.5) + self.eps)
+                param.data = ndl.Tensor(out, dtype=param.dtype).data
+
+

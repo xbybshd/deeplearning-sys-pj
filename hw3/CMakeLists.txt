@@ -5,7 +5,13 @@ cmake_policy(SET CMP0146 OLD)
 # find correct version of Python
 execute_process(COMMAND python3-config --prefix
   OUTPUT_VARIABLE Python_ROOT_DIR)
-find_package(Python COMPONENTS Development Interpreter REQUIRED)
+set(CMAKE_PREFIX_PATH "/usr/bin")
+set(Python3_EXECUTABLE /usr/bin/python3) 
+set(PYTHON3_INCLUDE_DIR /usr/include/python3.6) 
+set(PYTHON3_LIBRARY /usr/lib/x86_64-linux-gnu/libpython3.6m.so)
+message(STATUS "Python_ROOT_DIR: ${Python_ROOT_DIR}")
+message(STATUS "Python include directories: ${Python_INCLUDE_DIRS}")
+find_package(Python3 COMPONENTS Development Interpreter REQUIRED)
 include_directories(${Python_INCLUDE_DIRS})
 
 # find pybind

@@ -1,0 +1,4 @@
+/home/cc/file/dpsys/deeplearning-sys-pj-master/hw3/CMakeFiles/ndarray_backend_cpu.dir
+/home/cc/file/dpsys/deeplearning-sys-pj-master/hw3/CMakeFiles/ndarray_backend_cuda.dir
+/home/cc/file/dpsys/deeplearning-sys-pj-master/hw3/CMakeFiles/edit_cache.dir
+/home/cc/file/dpsys/deeplearning-sys-pj-master/hw3/CMakeFiles/rebuild_cache.dir

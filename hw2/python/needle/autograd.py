@@ -8,6 +8,7 @@ import numpy
 
 from needle import init
 
+
 # needle version
 LAZY_MODE = False
 TENSOR_COUNTER = 0

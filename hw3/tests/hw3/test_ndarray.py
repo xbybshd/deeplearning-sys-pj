@@ -87,11 +87,21 @@ def test_compact(params, device):
     shape, np_fn, nd_fn = params["shape"], params["np_fn"], params["nd_fn"]
     _A = np.random.randint(low=0, high=10, size=shape)
     A = nd.array(_A, device=device)
-
+    print("A", str(A))
+    print("nd_fn(A)", str(nd_fn(A)))
+    print("A shape",str(A.shape))
+    print("A stride",str(A.strides))
+    print("A offset",str(A._offset))
+    print("nd_fn(A) shape",str(nd_fn(A).shape))
+    print("nd_fn(A) stride",str(nd_fn(A).strides))
+    print("nd_fn(A) offset",str(nd_fn(A)._offset))
     lhs = nd_fn(A).compact()
+    print("lhs:",str(lhs))
+
     assert lhs.is_compact(), "array is not compact"
 
     rhs = np_fn(_A)
+    print("rhs:",str(rhs))
     np.testing.assert_allclose(lhs.numpy(), rhs, atol=1e-5, rtol=1e-5)
 
 

@@ -43,7 +43,29 @@ void Fill(AlignedArray* out, scalar_t val) {
   }
 }
 
+void next_origin_index(std::vector<int32_t>& origin_index, const std::vector<int32_t>& shape){
+  size_t index_size = origin_index.size();
+  for (int i = index_size - 1; i >= 0; i--)
+  {
+    if (origin_index[i] == shape[i] - 1)
+    {
+      origin_index[i] = 0;
+      continue;
+    }
+    else{
+      origin_index[i]++;
+      break;
+    }
+  }
+}
 
+size_t next_compact_index(const std::vector<int32_t>& strides, std::vector<int32_t>& origin_index, size_t offset){
+  size_t res = offset;
+  for (int i = 0; i < origin_index.size(); i++){
+    res += origin_index[i] * strides[i];
+  }
+  return res;
+}
 
 void Compact(const AlignedArray& a, AlignedArray* out, std::vector<int32_t> shape,
              std::vector<int32_t> strides, size_t offset) {
@@ -62,7 +84,14 @@ void Compact(const AlignedArray& a, AlignedArray* out, std::vector<int32_t> shap
    *  function will implement here, so we won't repeat this note.)
    */
   /// BEGIN SOLUTION
-  assert(false && "Not Implemented");
+  std::vector<int32_t> origin_index(shape.size(), 0);
+  size_t next_index = offset;
+  for (int i = 0; i < out->size; i++)
+  {
+    out->ptr[i] = a.ptr[next_index];
+    next_origin_index(origin_index, shape);
+    next_index = next_compact_index(strides, origin_index, offset);
+  }
   /// END SOLUTION
 }
 
@@ -79,7 +108,14 @@ void EwiseSetitem(const AlignedArray& a, AlignedArray* out, std::vector<int32_t>
    *   offset: offset of the *out* array (not a, which has zero offset, being compact)
    */
   /// BEGIN SOLUTION
-  assert(false && "Not Implemented");
+  std::vector<int32_t> origin_index(shape.size(), 0);
+  size_t next_index = offset;
+  for (int i = 0; i < a.size; i++)
+  {
+    out->ptr[next_index] = a.ptr[i];
+    next_origin_index(origin_index, shape);
+    next_index = next_compact_index(strides, origin_index, offset);
+  }
   /// END SOLUTION
 }
 
@@ -100,7 +136,14 @@ void ScalarSetitem(const size_t size, scalar_t val, AlignedArray* out, std::vect
    */
 
   /// BEGIN SOLUTION
-  assert(false && "Not Implemented");
+  std::vector<int32_t> origin_index(shape.size(), 0);
+  size_t next_index = offset;
+  for (int i = 0; i < size; i++)
+  {
+    out->ptr[next_index] = val;
+    next_origin_index(origin_index, shape);
+    next_index = next_compact_index(strides, origin_index, offset);
+  }
   /// END SOLUTION
 }
 

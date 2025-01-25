@@ -16,3 +16,9 @@
 2.permute 按照索引轮换对应的shape和stride即可  
 3.broadcast_to 首先要保证新shape要么等于原shape,要么是1,之后将不与原shape相等的维度,即为1需要广播的维度的stride,设为0  
 4.get_item shape直接拿前后索引差除以step,stride用旧的stride乘上step,offset指的是每个维度最开始的索引,内层的start要加上所有外层的start,是一个规约算法
+
+## q2
+1.将一个非紧凑型矩阵转换为紧凑型矩阵,给出了原矩阵, 紧凑后的shape,stride,offset  
+构建类似shape的索引向量,类似高精度加法的方式,每次迭代将向量从后往前加1,需要进位.  在根据索引来利用公式a[i][j] = offset+a[i]*stride[i]+a[j]*stride[j]计算出要填入的数值在原矩阵中的位置.对紧凑型矩阵进行for循环即可  
+2.将一个紧凑矩阵赋值给一个非紧凑型矩阵,即将1调换位置即可  
+3.将标量赋值给紧凑矩阵,类似2

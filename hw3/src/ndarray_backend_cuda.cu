@@ -395,7 +395,110 @@ void EwiseTanh(const CudaArray& a, CudaArray* out) {
 ////////////////////////////////////////////////////////////////////////////////
 // Elementwise and scalar operations
 ////////////////////////////////////////////////////////////////////////////////
+__global__ void MatmulKernel(const scalar_t* a, const scalar_t* b, scalar_t* c, uint32_t M, uint32_t N,
+  uint32_t P){
+  #define V 2
+  #define TILE 4
+  /**
+  * 使用分块计算矩阵乘法，按照TILE大小分块
+  * a: M x N
+  * b: N x P
+  */
+  int block_x = blockIdx.x;
+  int block_y = blockIdx.y;
+  int thread_x = threadIdx.x;
+  int thread_y = threadIdx.y;
+  int thread_id = thread_x + thread_y * blockDim.x;
+  int nthreads = blockDim.x * blockDim.y;
+  // 每个block负责计算一个子矩阵的结果，具体来说，就是c[block_x*TILE: (block_x+1)*TILE, block_y*TILE: (block_y+1)*TILE]
+  // 通过累加"outer product"的结果计算这个子矩阵，product的两个元素都是分块后行列子矩阵的一个stripe
+  // 例如，a按行分块后每一块shape是(TILE, N)，再取一个stripe的shape就是(TILE, TILE)
+  // outer product每次的步长不是1，而是TILE
 
+  __shared__ scalar_t a_shared[TILE][TILE];
+  __shared__ scalar_t b_shared[TILE][TILE];
+  scalar_t c_reg[V][V] = {0};
+  scalar_t a_reg[V]={0}, b_reg[V]={0};
+
+
+  for(int start=0; start<N; start+=TILE){
+    __syncthreads();
+    // 一共有TILE * TILE个元素要导入，每个线程平均负责(TILE * TILE+nthreads-1)/nthreads个元素
+    // for (int i=0; i<(TILE * TILE+nthreads-1)/nthreads; i++){
+    //   int idx = thread_id + i * nthreads; // 在shared中的索引
+    //   int x = idx / TILE; // 在shared中的索引
+    //   int y = idx % TILE; // 在shared中的索引
+    //   // a_shared中的(x, y)相当于a中的(x+block_x*TILE, y+start)
+    //   // b_shared中的(x, y)相当于b中的(x+start, y+block_y*TILE)
+    //   if(x+block_x*TILE < M && y+start < N){
+    //     a_shared[x][y] = a[(x+block_x*TILE)*N + y+start];
+    //   }
+    //   if(x+start < N && y+block_y*TILE < P){
+    //     b_shared[x][y] = b[(x+start)*P + y+block_y*TILE];
+    //   }
+    // }
+    for (int idx = thread_id; idx < TILE * TILE; idx += nthreads){
+      int x = idx / TILE; // 在shared中的索引
+      int y = idx % TILE; // 在shared中的索引
+      // a_shared中的(x, y)相当于a中的(x+block_x*TILE, y+start)
+      // b_shared中的(x, y)相当于b中的(x+start, y+block_y*TILE)
+      if(x+block_x*TILE < M && y+start < N){
+        a_shared[x][y] = a[(x+block_x*TILE)*N + y+start];
+      }
+      if(x+start < N && y+block_y*TILE < P){
+        b_shared[x][y] = b[(x+start)*P + y+block_y*TILE];
+      }
+    }
+    // 接下来开始计算外积
+    // 通过遍历a_shared的列和b_shared的行，也就是a_shared的第stripe_i行和b_shared的第stripe_i列
+    int stripe_cnt = min(TILE, N-start);
+    for(int stripe_i=0; stripe_i<stripe_cnt; stripe_i++){
+      // 这个外积由nthreads负责计算，这个外积将stripe_a 和 stripe_b 按照连续的V行/列分块，由每个线程计算
+      // 接下来把计算V*V的外积结果的要用的数据加载到寄存器数组中
+      if(thread_x * V >= TILE || thread_y * V >= TILE)
+        continue;
+      for(int reg_x=0; reg_x<V; reg_x++){
+        int shared_x = reg_x + thread_x * V;
+        if(shared_x >= TILE){
+          break;
+        }
+        a_reg[reg_x] = a_shared[shared_x][stripe_i];
+        // b_reg[reg_x] = b_shared[stripe_i][shared_x];
+      }
+      for(int reg_y=0; reg_y<V; reg_y++){
+        int shared_y = reg_y + thread_y * V;
+        if(shared_y >= TILE){
+          printf("quit: thread id: %d, shared_y: %d, TILE: %d\n", thread_id, shared_y, TILE);
+          break;
+        }
+      // a_reg[reg_y] = a_shared[stripe_i][shared_y];
+        b_reg[reg_y] = b_shared[stripe_i][shared_y];
+      }
+      for(int i=0; i<V; i++){
+        for(int j=0; j<V; j++){
+          // 这里“越界”可以不管吧？把c_reg放到结果中的时候再处理
+          c_reg[i][j] += a_reg[i] * b_reg[j];
+        }
+      }
+    }
+  }
+
+  // 把c_reg的结果写入到c中
+  if(thread_x * V >= TILE || thread_y * V >= TILE)
+    return;
+  for(int i=0; i<V; i++){
+    for(int j=0; j<V; j++){
+      int x = block_x * TILE + thread_x * V + i;
+      int y = block_y * TILE + thread_y * V + j;
+      if(x < M && y < P){
+        c[x*P + y] = c_reg[i][j];
+      } else {
+        break;
+      }
+
+    }
+  }
+}
 
 void Matmul(const CudaArray& a, const CudaArray& b, CudaArray* out, uint32_t M, uint32_t N,
             uint32_t P) {
@@ -422,7 +525,10 @@ void Matmul(const CudaArray& a, const CudaArray& b, CudaArray* out, uint32_t M, 
    */
 
   /// BEGIN SOLUTION
-  assert(false && "Not Implemented");
+  dim3 grid_dim = dim3((M + TILE - 1) / TILE, (P + TILE - 1) / TILE, 1);
+  dim3 block_dim = dim3(16, 16, 1);
+  // dim3 block_dim = dim3(2, 2, 1);
+  MatmulKernel<<<grid_dim, block_dim>>>(a.ptr, b.ptr, out->ptr, M, N, P);
   /// END SOLUTION
 }
 
@@ -552,7 +658,7 @@ PYBIND11_MODULE(ndarray_backend_cuda, m) {
   m.def("ewise_exp", EwiseExp);
   m.def("ewise_tanh", EwiseTanh);
 
-  // m.def("matmul", Matmul);
+  m.def("matmul", Matmul);
 
   m.def("reduce_max", ReduceMax);
   m.def("reduce_sum", ReduceSum);

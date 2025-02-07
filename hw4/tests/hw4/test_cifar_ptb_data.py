@@ -40,6 +40,7 @@ def test_cifar10_loader(batch_size, train, device):
     train_loader = ndl.data.DataLoader(cifar10_train_dataset, batch_size)
     for (X, y) in train_loader:
         break
+    print("X.cached_data:",type(X.cached_data))
     assert isinstance(X.cached_data, nd.NDArray)
     assert isinstance(X, ndl.Tensor)
     assert isinstance(y, ndl.Tensor)

@@ -1,5 +1,6 @@
 import numpy as np
 from ..autograd import Tensor
+import needle as ndl
 
 from typing import Iterator, Optional, List, Sized, Union, Iterable, Any
 
@@ -60,12 +61,18 @@ class DataLoader:
 
     def __iter__(self):
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
-        ### END YOUR SOLUTION
+        if self.shuffle:
+            self.ordering = np.array_split(np.random.permutation(len(self.dataset)), 
+                                           range(self.batch_size, len(self.dataset), self.batch_size))
+        self.index = 0
         return self
 
     def __next__(self):
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        self.index += 1
+        if self.index >= len(self.ordering):
+            raise StopIteration
+        samples = self.dataset[self.ordering[self.index]]
+        return Tensor(samples[0], device = ndl.cpu()), Tensor(samples[1], device = ndl.cpu())
         ### END YOUR SOLUTION
 

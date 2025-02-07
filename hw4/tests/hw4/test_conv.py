@@ -348,6 +348,7 @@ def test_nn_conv_forward(s, cin, cout, k, stride, device):
     import torch
     f = ndl.nn.Conv(cin, cout, k, stride=stride, device=device)
     x = ndl.init.rand(10, cin, s, s, device=device)
+    print("x.type:",type(x))
 
     g = torch.nn.Conv2d(cin, cout, k, stride=stride, padding=k//2)
     g.weight.data = torch.tensor(f.weight.cached_data.numpy().transpose(3, 2, 0, 1))
@@ -465,6 +466,7 @@ def test_train_cifar10(device):
     np.random.seed(0)
     model = ResNet9(device=device, dtype="float32")
     out = one_iter_of_cifar10_training(dataloader, model, opt=ndl.optim.Adam(model.parameters(), lr=0.001, weight_decay=0.001), device=device)
+    print("out:",out)
     assert np.linalg.norm(np.array(list(out), dtype=object) - np.array([0.09375, 3.5892258])) < 1e-2
 
 

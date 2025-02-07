@@ -1,0 +1,17 @@
+============================= test session starts ==============================
+platform linux -- Python 3.8.0, pytest-8.3.4, pluggy-1.5.0 -- /usr/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/cc/file/dpsys/deeplearning-sys-pj-master/hw2
+collecting ... collected 93 items / 93 deselected / 0 selected
+
+=============================== warnings summary ===============================
+../../../../../../usr/lib/python3/dist-packages/urllib3/util/selectors.py:14
+  /usr/lib/python3/dist-packages/urllib3/util/selectors.py:14: DeprecationWarning: Using or importing the ABCs from 'collections' instead of from 'collections.abc' is deprecated since Python 3.3, and in 3.9 it will stop working
+    from collections import namedtuple, Mapping
+
+../../../../../../usr/lib/python3/dist-packages/urllib3/_collections.py:2
+  /usr/lib/python3/dist-packages/urllib3/_collections.py:2: DeprecationWarning: Using or importing the ABCs from 'collections' instead of from 'collections.abc' is deprecated since Python 3.3, and in 3.9 it will stop working
+    from collections import Mapping, MutableMapping
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+====================== 93 deselected, 2 warnings in 0.37s ======================

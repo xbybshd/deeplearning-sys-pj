@@ -11,6 +11,7 @@ import needle as ndl
 import needle.nn as nn
 
 from simple_ml import *
+from simple_ml import train_ptb
 from models import LanguageModel
 
 

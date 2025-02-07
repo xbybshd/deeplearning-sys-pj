@@ -85,7 +85,6 @@ __device__ size_t compact_index(const CudaVec& shape, const CudaVec& strides, si
     res += (out_size % shape.data[i]) * strides.data[i];
     out_size /= shape.data[i];
   }
-  printf("res: %d, out_size: %d\n", res, out_size);
   return res;
 }
 
@@ -108,7 +107,6 @@ __global__ void CompactKernel(const scalar_t* a, scalar_t* out, size_t size, Cud
   /// BEGIN SOLUTION
   if(gid < size){
     size_t out_idx = compact_index(shape, strides, offset, gid);
-    printf("out_idx: %lu, gid: %lu, out_size: %lu\n", out_idx, gid, size);
     out[gid] = a[out_idx];
   }
   /// END SOLUTION

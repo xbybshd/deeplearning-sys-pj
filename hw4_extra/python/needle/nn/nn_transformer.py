@@ -108,7 +108,14 @@ class MultiHeadAttention(Module):
         probs = None
 
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        sqrt_d = np.sqrt(q_dim)
+        Z = self.matmul(q, k) / sqrt_d
+        if self.causal:
+            mask = self.create_causal_mask(queries_len, keys_values_len, self.device)
+            Z = Z + mask.broadcast_to(Z.shape)
+        probs = self.softmax(Z)
+        probs = self.dropout(probs)
+        result = self.matmul(probs, v.transpose((2, 3)))
         ### END YOUR SOLUTION
 
         return result, probs
@@ -202,7 +209,14 @@ class AttentionLayer(Module):
         result = None
 
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        q, k, v = self.prenorm_q(q), self.prenorm_k(k), self.prenorm_v(v)
+        q, k, v = self.q_projection(q), self.k_projection(k), self.v_projection(v)
+        q = ops.permute(q.reshape((batch_size, queries_len, self.num_head, self.dim_head)), (0, 2, 1, 3))
+        k = ops.permute(k.reshape((batch_size, keys_values_len, self.num_head, self.dim_head)), (0, 2, 1, 3))
+        v = ops.permute(v.reshape((batch_size, keys_values_len, self.num_head, self.dim_head)), (0, 2, 1, 3))
+        attn_res, _ = self.attn(q, k, v)
+        attn_res = ops.permute(attn_res, (0, 2, 1, 3)).reshape((batch_size, keys_values_len, self.num_head * self.dim_head))
+        result = self.out_projection(attn_res)
         ### END YOUR SOLUTION
 
         return result
@@ -229,7 +243,27 @@ class TransformerLayer(Module):
         self.dtype = dtype
 
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        self.layer1 = Sequential(
+            AttentionLayer(
+                q_features=q_features,
+                num_head=num_head,
+                dim_head=dim_head,
+                out_features=q_features,
+                dropout=dropout,
+                causal=causal,
+                device=device,
+                dtype=dtype
+            ),
+            Dropout(dropout),
+        )
+        self.layer2 = Sequential(
+            LayerNorm1d(q_features, device=device, dtype=dtype),
+            Linear(q_features, hidden_size, bias=True, device=device, dtype=dtype),
+            ReLU(),
+            Dropout(dropout),
+            Linear(hidden_size, q_features, bias=True, device=device, dtype=dtype),
+            Dropout(dropout),
+        )
         ### END YOUR SOLUTION
 
     def forward(
@@ -245,7 +279,8 @@ class TransformerLayer(Module):
         batch_size, seq_len, x_dim = x.shape
 
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        x = self.layer1(x) + x
+        x = self.layer2(x) + x        
         ### END YOUR SOLUTION
 
         return x
@@ -276,8 +311,23 @@ class Transformer(Module):
         self.batch_first = batch_first
 
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
-        ### END YOUR SOLUTION
+        self.embedding = Embedding(
+            num_embeddings=sequence_len,
+            embedding_dim=embedding_size,
+            device=device,
+            dtype=dtype
+        )
+        layers = [TransformerLayer(
+            q_features=embedding_size,
+            num_head=num_head,
+            dim_head=dim_head,
+            hidden_size=hidden_size,
+            dropout=dropout,
+            causal=causal,
+            device=device,
+            dtype=dtype
+        ) for _ in range(num_layers)]
+        self.model = Sequential(*layers)        ### END YOUR SOLUTION
 
     def forward(
         self,
@@ -288,7 +338,12 @@ class Transformer(Module):
             x = ops.transpose(x, axes=(0, 1))
 
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        bs, seq_len, input_dim = x.shape
+        time = np.repeat(np.arange(seq_len), bs).reshape((seq_len, bs)).T
+        time = Tensor(time, device=self.device, dtype=self.dtype)
+        time = self.embedding(time)
+        x = x + time
+        x = self.model(x)        
         ### END YOUR SOLUTION
 
         if not self.batch_first:

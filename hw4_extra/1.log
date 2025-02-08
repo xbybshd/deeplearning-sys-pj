@@ -1,0 +1,50 @@
+============================= test session starts ==============================
+platform linux -- Python 3.8.0, pytest-8.3.4, pluggy-1.5.0 -- /usr/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/cc/file/dpsys/deeplearning-sys-pj-master/hw4_extra
+collecting ... collected 112 items / 80 deselected / 32 selected
+
+tests/hw4_extra/test_transformer.py::test_transformer_model[cpu-0.0-False-32-8-2-64-27-5-8] PASSED [  3%]
+tests/hw4_extra/test_transformer.py::test_transformer_model[cpu-0.0-False-32-8-2-64-27-11-8] PASSED [  6%]
+tests/hw4_extra/test_transformer.py::test_transformer_model[cpu-0.0-False-32-8-4-64-27-5-8] PASSED [  9%]
+tests/hw4_extra/test_transformer.py::test_transformer_model[cpu-0.0-False-32-8-4-64-27-11-8] PASSED [ 12%]
+tests/hw4_extra/test_transformer.py::test_transformer_model[cpu-0.0-True-32-8-2-64-27-5-8] PASSED [ 15%]
+tests/hw4_extra/test_transformer.py::test_transformer_model[cpu-0.0-True-32-8-2-64-27-11-8] PASSED [ 18%]
+tests/hw4_extra/test_transformer.py::test_transformer_model[cpu-0.0-True-32-8-4-64-27-5-8] PASSED [ 21%]
+tests/hw4_extra/test_transformer.py::test_transformer_model[cpu-0.0-True-32-8-4-64-27-11-8] PASSED [ 25%]
+tests/hw4_extra/test_transformer.py::test_transformer_model[cpu-0.1-False-32-8-2-64-27-5-8] PASSED [ 28%]
+tests/hw4_extra/test_transformer.py::test_transformer_model[cpu-0.1-False-32-8-2-64-27-11-8] PASSED [ 31%]
+tests/hw4_extra/test_transformer.py::test_transformer_model[cpu-0.1-False-32-8-4-64-27-5-8] PASSED [ 34%]
+tests/hw4_extra/test_transformer.py::test_transformer_model[cpu-0.1-False-32-8-4-64-27-11-8] PASSED [ 37%]
+tests/hw4_extra/test_transformer.py::test_transformer_model[cpu-0.1-True-32-8-2-64-27-5-8] PASSED [ 40%]
+tests/hw4_extra/test_transformer.py::test_transformer_model[cpu-0.1-True-32-8-2-64-27-11-8] PASSED [ 43%]
+tests/hw4_extra/test_transformer.py::test_transformer_model[cpu-0.1-True-32-8-4-64-27-5-8] PASSED [ 46%]
+tests/hw4_extra/test_transformer.py::test_transformer_model[cpu-0.1-True-32-8-4-64-27-11-8] PASSED [ 50%]
+tests/hw4_extra/test_transformer.py::test_transformer_model[cuda-0.0-False-32-8-2-64-27-5-8] PASSED [ 53%]
+tests/hw4_extra/test_transformer.py::test_transformer_model[cuda-0.0-False-32-8-2-64-27-11-8] PASSED [ 56%]
+tests/hw4_extra/test_transformer.py::test_transformer_model[cuda-0.0-False-32-8-4-64-27-5-8] PASSED [ 59%]
+tests/hw4_extra/test_transformer.py::test_transformer_model[cuda-0.0-False-32-8-4-64-27-11-8] PASSED [ 62%]
+tests/hw4_extra/test_transformer.py::test_transformer_model[cuda-0.0-True-32-8-2-64-27-5-8] PASSED [ 65%]
+tests/hw4_extra/test_transformer.py::test_transformer_model[cuda-0.0-True-32-8-2-64-27-11-8] PASSED [ 68%]
+tests/hw4_extra/test_transformer.py::test_transformer_model[cuda-0.0-True-32-8-4-64-27-5-8] PASSED [ 71%]
+tests/hw4_extra/test_transformer.py::test_transformer_model[cuda-0.0-True-32-8-4-64-27-11-8] PASSED [ 75%]
+tests/hw4_extra/test_transformer.py::test_transformer_model[cuda-0.1-False-32-8-2-64-27-5-8] PASSED [ 78%]
+tests/hw4_extra/test_transformer.py::test_transformer_model[cuda-0.1-False-32-8-2-64-27-11-8] PASSED [ 81%]
+tests/hw4_extra/test_transformer.py::test_transformer_model[cuda-0.1-False-32-8-4-64-27-5-8] PASSED [ 84%]
+tests/hw4_extra/test_transformer.py::test_transformer_model[cuda-0.1-False-32-8-4-64-27-11-8] PASSED [ 87%]
+tests/hw4_extra/test_transformer.py::test_transformer_model[cuda-0.1-True-32-8-2-64-27-5-8] PASSED [ 90%]
+tests/hw4_extra/test_transformer.py::test_transformer_model[cuda-0.1-True-32-8-2-64-27-11-8] PASSED [ 93%]
+tests/hw4_extra/test_transformer.py::test_transformer_model[cuda-0.1-True-32-8-4-64-27-5-8] PASSED [ 96%]
+tests/hw4_extra/test_transformer.py::test_transformer_model[cuda-0.1-True-32-8-4-64-27-11-8] PASSED [100%]
+
+=============================== warnings summary ===============================
+../../../../../../usr/lib/python3/dist-packages/urllib3/util/selectors.py:14
+  /usr/lib/python3/dist-packages/urllib3/util/selectors.py:14: DeprecationWarning: Using or importing the ABCs from 'collections' instead of from 'collections.abc' is deprecated since Python 3.3, and in 3.9 it will stop working
+    from collections import namedtuple, Mapping
+
+../../../../../../usr/lib/python3/dist-packages/urllib3/_collections.py:2
+  /usr/lib/python3/dist-packages/urllib3/_collections.py:2: DeprecationWarning: Using or importing the ABCs from 'collections' instead of from 'collections.abc' is deprecated since Python 3.3, and in 3.9 it will stop working
+    from collections import Mapping, MutableMapping
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+================ 32 passed, 80 deselected, 2 warnings in 3.76s =================
